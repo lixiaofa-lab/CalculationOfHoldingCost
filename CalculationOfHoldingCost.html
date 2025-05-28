@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>持仓成本计算器</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 700px;
+            margin: 20px auto;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        th,
+        td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: center;
+        }
+
+        input[type=number] {
+            width: 80px;
+        }
+
+        input[type=text] {
+            width: 120px;
+        }
+
+        button {
+            margin-top: 10px;
+            padding: 6px 12px;
+        }
+
+        h2 {
+            margin-top: 30px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>持仓成本计算器</h1>
+
+    <h2>已有持仓</h2>
+    <table id="holdings-table">
+        <thead>
+            <tr>
+                <th>股票代码</th>
+                <th>数量</th>
+                <th>平均成本价（元）</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- 初始示例行 -->
+            <tr>
+                <td><input type="text" value="AAPL" /></td>
+                <td><input type="number" value="10" min="0" /></td>
+                <td><input type="number" value="150" step="0.01" min="0" /></td>
+                <td><button onclick="removeRow(this)">删除</button></td>
+            </tr>
+            <!-- <tr>
+                <td><input type="text" value="MSFT" /></td>
+                <td><input type="number" value="5" min="0" /></td>
+                <td><input type="number" value="250" step="0.01" min="0" /></td>
+                <td><button onclick="removeRow(this)">删除</button></td>
+            </tr> -->
+        </tbody>
+    </table>
+    <button onclick="addHoldingRow()">添加持仓</button>
+
+    <h2>即将买入的股票</h2>
+    <table id="new-buy-table">
+        <thead>
+            <tr>
+                <th>股票代码</th>
+                <th>买入数量</th>
+                <th>买入价格（元）</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><input type="text" value="AAPL" /></td>
+                <td><input type="number" value="2" min="0" /></td>
+                <td><input type="number" value="155" step="0.01" min="0" /></td>
+                <td><button onclick="removeRow(this)">删除</button></td>
+            </tr>
+        </tbody>
+    </table>
+    <button onclick="addBuyRow()">添加买入</button>
+
+    <h2>计算结果</h2>
+    <button onclick="calculate()">计算平均成本</button>
+
+    <div id="result" style="margin-top:20px; font-weight: bold;"></div>
+
+    <script>
+        function addHoldingRow() {
+            const tbody = document.querySelector('#holdings-table tbody');
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+      <td><input type="text" value="" /></td>
+      <td><input type="number" value="0" min="0" /></td>
+      <td><input type="number" value="0" step="0.01" min="0" /></td>
+      <td><button onclick="removeRow(this)">删除</button></td>
+    `;
+            tbody.appendChild(tr);
+        }
+
+        function addBuyRow() {
+            const tbody = document.querySelector('#new-buy-table tbody');
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+      <td><input type="text" value="" /></td>
+      <td><input type="number" value="0" min="0" /></td>
+      <td><input type="number" value="0" step="0.01" min="0" /></td>
+      <td><button onclick="removeRow(this)">删除</button></td>
+    `;
+            tbody.appendChild(tr);
+        }
+
+        function removeRow(button) {
+            const tr = button.parentElement.parentElement;
+            tr.remove();
+        }
+
+        function calculate() {
+            // 读取已有持仓
+            const holdings = {};
+            const holdingRows = document.querySelectorAll('#holdings-table tbody tr');
+            for (const row of holdingRows) {
+                const code = row.cells[0].querySelector('input').value.trim().toUpperCase();
+                const qty = parseFloat(row.cells[1].querySelector('input').value);
+                const cost = parseFloat(row.cells[2].querySelector('input').value);
+                if (!code || qty <= 0 || cost < 0) continue;
+                holdings[code] = holdings[code] || { qty: 0, cost: 0 };
+                holdings[code].qty += qty;
+                holdings[code].cost += qty * cost;
+            }
+
+            // 读取买入股票
+            const buyRows = document.querySelectorAll('#new-buy-table tbody tr');
+            for (const row of buyRows) {
+                const code = row.cells[0].querySelector('input').value.trim().toUpperCase();
+                const qty = parseFloat(row.cells[1].querySelector('input').value);
+                const price = parseFloat(row.cells[2].querySelector('input').value);
+                if (!code || qty <= 0 || price < 0) continue;
+                holdings[code] = holdings[code] || { qty: 0, cost: 0 };
+                holdings[code].qty += qty;
+                holdings[code].cost += qty * price;
+            }
+
+            // 计算每只股票的平均成本和总成本
+            let totalCost = 0, totalQty = 0;
+            let resultHTML = '<table><thead><tr><th>股票代码</th><th>总数量</th><th>平均成本价（元）</th><th>总成本（元）</th></tr></thead><tbody>';
+
+            for (const code in holdings) {
+                const qty = holdings[code].qty;
+                const cost = holdings[code].cost;
+                const avgCost = cost / qty;
+                totalCost += cost;
+                totalQty += qty;
+                resultHTML += `<tr>
+        <td>${code}</td>
+        <td>${qty.toFixed(2)}</td>
+        <td>${avgCost.toFixed(2)}</td>
+        <td>${cost.toFixed(2)}</td>
+      </tr>`;
+            }
+            resultHTML += `</tbody></table>`;
+            resultHTML += `<p>所有股票累计成本总价：<strong>${totalCost.toFixed(2)} 元</strong></p>`;
+            document.getElementById('result').innerHTML = resultHTML;
+        }
+    </script>
+
+</body>
+
+</html>
