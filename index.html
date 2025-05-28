@@ -3,114 +3,229 @@
 
 <head>
     <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>持仓成本计算器</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Arial', sans-serif;
             max-width: 700px;
             margin: 20px auto;
+            padding: 0 15px;
+            background: linear-gradient(135deg, #f8fafc 0%, #e0e7ef 100%);
+        }
+
+        .container {
+            background: #fff;
+            border-radius: 18px;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+            padding: 32px 18px 24px 18px;
+            margin-top: 32px;
         }
 
         table {
-            border-collapse: collapse;
+            border-collapse: separate;
+            border-spacing: 0;
             width: 100%;
             margin-top: 10px;
+            display: block;
+            overflow-x: auto;
+            white-space: nowrap;
+            background: #f6f8fa;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
         }
 
         th,
         td {
-            border: 1px solid #ccc;
-            padding: 8px;
+            border: none;
+            padding: 12px 10px;
             text-align: center;
+            white-space: normal;
         }
 
-        input[type=number] {
-            width: 80px;
+        th {
+            background: #e3eaf6;
+            color: #2d3a4b;
+            font-weight: 600;
         }
 
+        tr:not(:last-child) td {
+            border-bottom: 1px solid #e0e7ef;
+        }
+
+        input[type=number],
         input[type=text] {
-            width: 120px;
+            width: 100%;
+            padding: 8px 10px;
+            margin: 4px 0;
+            box-sizing: border-box;
+            border: 1px solid #cfd8dc;
+            border-radius: 6px;
+            background: #f9fbfd;
+            transition: border 0.2s;
+        }
+
+        input:focus {
+            border: 1.5px solid #4f8cff;
+            outline: none;
+            background: #fff;
         }
 
         button {
             margin-top: 10px;
-            padding: 6px 12px;
+            padding: 10px 0;
+            width: 100%;
+            box-sizing: border-box;
+            background: linear-gradient(90deg, #4f8cff 0%, #38cfa6 100%);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.08em;
+            font-weight: 500;
+            box-shadow: 0 2px 8px rgba(79, 140, 255, 0.08);
+            transition: background 0.2s, box-shadow 0.2s;
+        }
+
+        button:hover {
+            background: linear-gradient(90deg, #38cfa6 0%, #4f8cff 100%);
+            box-shadow: 0 4px 16px rgba(56, 207, 166, 0.12);
+        }
+
+        h1 {
+            text-align: center;
+            margin-top: 30px;
+            color: #2d3a4b;
+            font-size: 2.2em;
+            letter-spacing: 2px;
+            font-weight: 700;
         }
 
         h2 {
-            margin-top: 30px;
+            text-align: left;
+            margin: 32px 0 12px 0;
+            color: #4f8cff;
+            font-size: 1.25em;
+            font-weight: 600;
+        }
+
+        #result {
+            margin-top: 24px;
+            font-weight: bold;
+            text-align: center;
+            color: #38cfa6;
+            font-size: 1.15em;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 12px 4px 12px 4px;
+            }
+
+            table {
+                font-size: 0.95em;
+            }
+
+            th,
+            td {
+                padding: 8px 4px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 1.5em;
+            }
+
+            h2 {
+                font-size: 1.08em;
+            }
+
+            button {
+                padding: 8px 0;
+                font-size: 1em;
+            }
+        }
+
+        td button {
+            width: auto;
+            white-space: nowrap;
+            min-width: 60px;
+            padding: 8px 16px;
+            margin: 0;
+            display: inline-block;
         }
     </style>
 </head>
 
 <body>
+    <div class="container">
+        <h1>持仓成本计算器</h1>
 
-    <h1>持仓成本计算器</h1>
+        <h2>已有持仓</h2>
+        <table id="holdings-table">
+            <thead>
+                <tr>
+                    <th>股票代码</th>
+                    <th>数量</th>
+                    <th>平均成本价（元）</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- 初始示例行 -->
+                <tr>
+                    <td><input type="text" value="AAPL" /></td>
+                    <td><input type="number" value="10" min="0" /></td>
+                    <td><input type="number" value="150" step="0.01" min="0" /></td>
+                    <td><button onclick="removeRow(this)">删除</button></td>
+                </tr>
+                <!-- <tr>
+                    <td><input type="text" value="MSFT" /></td>
+                    <td><input type="number" value="5" min="0" /></td>
+                    <td><input type="number" value="250" step="0.01" min="0" /></td>
+                    <td><button onclick="removeRow(this)">删除</button></td>
+                </tr> -->
+            </tbody>
+        </table>
+        <button onclick="addHoldingRow()">添加持仓</button>
 
-    <h2>已有持仓</h2>
-    <table id="holdings-table">
-        <thead>
-            <tr>
-                <th>股票代码</th>
-                <th>数量</th>
-                <th>平均成本价（元）</th>
-                <th>操作</th>
-            </tr>
-        </thead>
-        <tbody>
-            <!-- 初始示例行 -->
-            <tr>
-                <td><input type="text" value="AAPL" /></td>
-                <td><input type="number" value="10" min="0" /></td>
-                <td><input type="number" value="150" step="0.01" min="0" /></td>
-                <td><button onclick="removeRow(this)">删除</button></td>
-            </tr>
-            <!-- <tr>
-                <td><input type="text" value="MSFT" /></td>
-                <td><input type="number" value="5" min="0" /></td>
-                <td><input type="number" value="250" step="0.01" min="0" /></td>
-                <td><button onclick="removeRow(this)">删除</button></td>
-            </tr> -->
-        </tbody>
-    </table>
-    <button onclick="addHoldingRow()">添加持仓</button>
+        <h2>即将买入的股票</h2>
+        <table id="new-buy-table">
+            <thead>
+                <tr>
+                    <th>股票代码</th>
+                    <th>买入数量</th>
+                    <th>买入价格（元）</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><input type="text" value="AAPL" /></td>
+                    <td><input type="number" value="2" min="0" /></td>
+                    <td><input type="number" value="155" step="0.01" min="0" /></td>
+                    <td><button onclick="removeRow(this)">删除</button></td>
+                </tr>
+            </tbody>
+        </table>
+        <button onclick="addBuyRow()">添加买入</button>
 
-    <h2>即将买入的股票</h2>
-    <table id="new-buy-table">
-        <thead>
-            <tr>
-                <th>股票代码</th>
-                <th>买入数量</th>
-                <th>买入价格（元）</th>
-                <th>操作</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td><input type="text" value="AAPL" /></td>
-                <td><input type="number" value="2" min="0" /></td>
-                <td><input type="number" value="155" step="0.01" min="0" /></td>
-                <td><button onclick="removeRow(this)">删除</button></td>
-            </tr>
-        </tbody>
-    </table>
-    <button onclick="addBuyRow()">添加买入</button>
+        <h2>计算结果</h2>
+        <button onclick="calculate()">计算平均成本</button>
 
-    <h2>计算结果</h2>
-    <button onclick="calculate()">计算平均成本</button>
-
-    <div id="result" style="margin-top:20px; font-weight: bold;"></div>
-
+        <div id="result" style="margin-top:20px; font-weight: bold;"></div>
+    </div>
     <script>
         function addHoldingRow() {
             const tbody = document.querySelector('#holdings-table tbody');
             const tr = document.createElement('tr');
             tr.innerHTML = `
-      <td><input type="text" value="" /></td>
-      <td><input type="number" value="0" min="0" /></td>
-      <td><input type="number" value="0" step="0.01" min="0" /></td>
-      <td><button onclick="removeRow(this)">删除</button></td>
-    `;
+                <td><input type="text" value="" /></td>
+                <td><input type="number" value="0" min="0" /></td>
+                <td><input type="number" value="0" step="0.01" min="0" /></td>
+                <td><button onclick="removeRow(this)">删除</button></td>
+                `;
             tbody.appendChild(tr);
         }
 
@@ -167,19 +282,13 @@
                 const avgCost = cost / qty;
                 totalCost += cost;
                 totalQty += qty;
-                resultHTML += `<tr>
-        <td>${code}</td>
-        <td>${qty.toFixed(2)}</td>
-        <td>${avgCost.toFixed(2)}</td>
-        <td>${cost.toFixed(2)}</td>
-      </tr>`;
+                resultHTML += `<tr>\n        <td>${code}</td>\n        <td>${qty.toFixed(2)}</td>\n        <td>${avgCost.toFixed(2)}</td>\n        <td>${cost.toFixed(2)}</td>\n      </tr>`;
             }
             resultHTML += `</tbody></table>`;
             resultHTML += `<p>所有股票累计成本总价：<strong>${totalCost.toFixed(2)} 元</strong></p>`;
             document.getElementById('result').innerHTML = resultHTML;
         }
     </script>
-
 </body>
 
 </html>
