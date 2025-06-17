@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="zh-CN">
 
 <head>
@@ -217,6 +217,29 @@
         <div id="result" style="margin-top:20px; font-weight: bold;"></div>
     </div>
     <script>
+        fetch("https://www.interactivebrokers.com.hk/portal.proxy/v1/portal/portfolio2/U15996855/positions", {
+  "headers": {
+    "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
+    "accept-language": "zh-CN,zh;q=0.9,zh-TW;q=0.8,en;q=0.7",
+    "cache-control": "max-age=0",
+    "priority": "u=0, i",
+    "sec-ch-ua": "\"Google Chrome\";v=\"137\", \"Chromium\";v=\"137\", \"Not/A)Brand\";v=\"24\"",
+    "sec-ch-ua-mobile": "?0",
+    "sec-ch-ua-platform": "\"Windows\"",
+    "sec-fetch-dest": "document",
+    "sec-fetch-mode": "navigate",
+    "sec-fetch-site": "none",
+    "sec-fetch-user": "?1",
+    "upgrade-insecure-requests": "1"
+  },
+  "referrerPolicy": "strict-origin-when-cross-origin",
+  "body": null,
+  "method": "GET",
+  "mode": "cors",
+  "credentials": "include"
+}).then(res=>{
+            console.log('lixiaofa',res)
+});
         function addHoldingRow() {
             const tbody = document.querySelector('#holdings-table tbody');
             const tr = document.createElement('tr');
